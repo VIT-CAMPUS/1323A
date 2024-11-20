@@ -1,0 +1,60 @@
+#include <stdio.h>
+#include <limits.h>
+
+struct Process {
+    int id, at, bt, priority, remaining_bt, ft, tat, wt, isCompleted;
+};
+
+void preemptive_priority_scheduling(struct Process p[], int n) {
+    int time = 0, completed = 0, current = -1;
+    while (completed < n) {
+        int highestPriority = -1;
+        for (int i = 0; i < n; i++) {
+            if (!p[i].isCompleted && p[i].at <= time) {
+                if (highestPriority == -1 || p[i].priority > p[highestPriority].priority) {
+                    highestPriority = i;
+                }
+            }
+        }
+        if (highestPriority == -1) {
+            time++;
+        } else {
+            if (current != highestPriority) {
+                current = highestPriority; // Switch to new process
+            }
+
+            p[current].remaining_bt--;
+            time++;
+
+            if (p[current].remaining_bt == 0) {
+                p[current].isCompleted = 1;
+                p[current].ft = time;
+                p[current].tat = p[current].ft - p[current].at;
+                p[current].wt = p[current].tat - p[current].bt;
+                completed++;
+            }
+        }
+    }
+
+    printf("ID\tAT\tBT\tPriority\tFT\tTAT\tWT\n");
+    for (int i = 0; i < n; i++)
+        printf("P%d\t%d\t%d\t%d\t\t%d\t%d\t%d\n", p[i].id, p[i].at, p[i].bt, p[i].priority, p[i].ft, p[i].tat, p[i].wt);
+}
+
+int main() {
+    int n;
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+
+    struct Process p[n];
+    for (int i = 0; i < n; i++) {
+        printf("Enter Arrival Time, Burst Time, and Priority for Process P%d: ", i + 1);
+        scanf("%d%d%d", &p[i].at, &p[i].bt, &p[i].priority);
+        p[i].id = i + 1;
+        p[i].remaining_bt = p[i].bt; // Initialize remaining burst time
+        p[i].isCompleted = 0;       // Initialize as not completed
+    }
+
+    preemptive_priority_scheduling(p, n);
+    return 0;
+}

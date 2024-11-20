@@ -1,0 +1,49 @@
+#include <stdio.h>
+
+struct Process {
+    int id, at, bt, remaining_bt, ft, tat, wt;
+};
+
+void round_robin(struct Process p[], int n, int quantum) {
+    int time = 0, completed = 0;
+    while (completed < n) {
+        for (int i = 0; i < n; i++) {
+            if (p[i].remaining_bt > 0 && p[i].at <= time) {
+                if (p[i].remaining_bt <= quantum) {
+                    time += p[i].remaining_bt;
+                    p[i].remaining_bt = 0;
+                    p[i].ft = time;
+                    p[i].tat = p[i].ft - p[i].at;
+                    p[i].wt = p[i].tat - p[i].bt;
+                    completed++;
+                } else {
+                    time += quantum;
+                    p[i].remaining_bt -= quantum;
+                }
+            }
+        }
+    }
+
+    printf("ID\tAT\tBT\tFT\tTAT\tWT\n");
+    for (int i = 0; i < n; i++)
+        printf("P%d\t%d\t%d\t%d\t%d\t%d\n", p[i].id, p[i].at, p[i].bt, p[i].ft, p[i].tat, p[i].wt);
+}
+
+int main() {
+    int n, quantum;
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+    printf("Enter the time quantum: ");
+    scanf("%d", &quantum);
+
+    struct Process p[n];
+    for (int i = 0; i < n; i++) {
+        printf("Enter Arrival Time and Burst Time for Process P%d: ", i + 1);
+        scanf("%d%d", &p[i].at, &p[i].bt);
+        p[i].id = i + 1;
+        p[i].remaining_bt = p[i].bt;
+    }
+
+    round_robin(p, n, quantum);
+    return 0;
+}

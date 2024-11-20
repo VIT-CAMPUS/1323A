@@ -1,0 +1,50 @@
+#include <stdio.h>
+
+struct Process {
+    int id, at, bt, ft, tat, wt;
+};
+
+void sjf_non_preemptive(struct Process p[], int n) {
+    int time = 0, completed = 0, minIndex;
+    int isCompleted[n];
+    for (int i = 0; i < n; i++) isCompleted[i] = 0;
+
+    while (completed < n) {
+        minIndex = -1;
+        for (int i = 0; i < n; i++) {
+            if (!isCompleted[i] && p[i].at <= time) {
+                if (minIndex == -1 || p[i].bt < p[minIndex].bt) minIndex = i;
+            }
+        }
+        if (minIndex == -1) {
+            time++;
+        } else {
+            time += p[minIndex].bt;
+            p[minIndex].ft = time;
+            p[minIndex].tat = p[minIndex].ft - p[minIndex].at;
+            p[minIndex].wt = p[minIndex].tat - p[minIndex].bt;
+            isCompleted[minIndex] = 1;
+            completed++;
+        }
+    }
+
+    printf("ID\tAT\tBT\tFT\tTAT\tWT\n");
+    for (int i = 0; i < n; i++)
+        printf("P%d\t%d\t%d\t%d\t%d\t%d\n", p[i].id, p[i].at, p[i].bt, p[i].ft, p[i].tat, p[i].wt);
+}
+
+int main() {
+    int n;
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+
+    struct Process p[n];
+    for (int i = 0; i < n; i++) {
+        printf("Enter Arrival Time and Burst Time for Process P%d: ", i + 1);
+        scanf("%d%d", &p[i].at, &p[i].bt);
+        p[i].id = i + 1;
+    }
+
+    sjf_non_preemptive(p, n);
+    return 0;
+}
