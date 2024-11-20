@@ -1,0 +1,141 @@
+#include <stdio.h>
+#include <stdbool.h>
+#include <string.h>
+
+// Define constants
+#define MEMORY_SIZE 200
+#define BLOCK_SIZE 10
+#define INSTRUCTION_SIZE 4
+
+// Define instruction opcodes
+#define GD 1
+#define PD 2
+#define LR 3
+#define SR 4
+#define CR 5
+#define BT 6
+#define H 7
+
+// Error codes
+#define ERR_OPCODE 1
+#define ERR_OPERAND 2
+
+// Memory
+int memory[MEMORY_SIZE];
+
+// Registers
+int general_register = 0;
+int instruction_register = 0;
+int instruction_counter = 0;
+bool toggle_register = false;
+
+// Function prototypes
+void execute_program();
+void execute_instruction(int opcode, int operand);
+void handle_error(int error_code);
+
+int main() {
+    // Example program with errors (already loaded in memory)
+    // Format: opcode (1 byte) | operand (3 bytes)
+    memory[0] = (GD << 24) | 50;  // GD 50 (valid)
+    memory[1] = (PD << 24) | 210; // PD 210 (operand error: out of bounds)
+    memory[2] = (99 << 24) | 0;   // Invalid opcode
+    memory[3] = (H << 24) | 0;    // H (valid)
+    
+    // Execute the program
+    execute_program();
+    
+    return 0;
+}
+
+void execute_program() {
+    while (instruction_counter < MEMORY_SIZE) {
+        // Fetch instruction
+        instruction_register = memory[instruction_counter];
+        instruction_counter++;
+
+        // Decode instruction
+        int opcode = (instruction_register >> 24) & 0xFF;
+        int operand = instruction_register & 0xFFFFFF;
+
+        // Halt instruction
+        if (opcode == H) {
+            printf("Program halted.\n");
+            break;
+        }
+
+        // Execute instruction
+        execute_instruction(opcode, operand);
+    }
+}
+
+void execute_instruction(int opcode, int operand) {
+    switch (opcode) {
+        case GD:  // Get data
+            if (operand < 0 || operand >= MEMORY_SIZE) {
+                handle_error(ERR_OPERAND);
+                return;
+            }
+            printf("GD: Read value from memory[%d]: %d\n", operand, memory[operand]);
+            break;
+        case PD:  // Put data
+            if (operand < 0 || operand >= MEMORY_SIZE) {
+                handle_error(ERR_OPERAND);
+                return;
+            }
+            printf("PD: Write value to memory[%d]: %d\n", operand, general_register);
+            memory[operand] = general_register;
+            break;
+        case LR:  // Load register
+            if (operand < 0 || operand >= MEMORY_SIZE) {
+                handle_error(ERR_OPERAND);
+                return;
+            }
+            general_register = memory[operand];
+            printf("LR: Loaded %d into general register from memory[%d]\n", general_register, operand);
+            break;
+        case SR:  // Store register
+            if (operand < 0 || operand >= MEMORY_SIZE) {
+                handle_error(ERR_OPERAND);
+                return;
+            }
+            memory[operand] = general_register;
+            printf("SR: Stored %d from general register to memory[%d]\n", general_register, operand);
+            break;
+        case CR:  // Compare
+            if (operand < 0 || operand >= MEMORY_SIZE) {
+                handle_error(ERR_OPERAND);
+                return;
+            }
+            toggle_register = (general_register == memory[operand]);
+            printf("CR: Compared register with memory[%d], toggle = %d\n", operand, toggle_register);
+            break;
+        case BT:  // Branch on true
+            if (toggle_register) {
+                if (operand < 0 || operand >= MEMORY_SIZE) {
+                    handle_error(ERR_OPERAND);
+                    return;
+                }
+                instruction_counter = operand;
+                printf("BT: Branching to instruction %d\n", instruction_counter);
+            }
+            break;
+        default:
+            handle_error(ERR_OPCODE);
+            break;
+    }
+}
+
+void handle_error(int error_code) {
+    switch (error_code) {
+        case ERR_OPCODE:
+            printf("Error: Invalid opcode at instruction %d\n", instruction_counter - 1);
+            break;
+        case ERR_OPERAND:
+            printf("Error: Invalid operand at instruction %d\n", instruction_counter - 1);
+            break;
+    }
+    // Halt program execution on error
+    printf("Program terminated due to error.\n");
+    instruction_counter = MEMORY_SIZE; // Exit the loop
+}
