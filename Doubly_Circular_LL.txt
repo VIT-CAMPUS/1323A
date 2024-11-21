@@ -1,0 +1,221 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node *next;
+    struct Node *prev;
+};
+
+struct Node *h = NULL;
+
+void createNode(int data) {
+    h = (struct Node *)malloc(sizeof(struct Node));
+    h->data = data;
+    h->next = h;
+    h->prev = h;
+}
+
+void insertfirst(int data) {
+    if (h == NULL) {
+        createNode(data);
+    } else {
+        struct Node *p = (struct Node *)malloc(sizeof(struct Node));
+        p->data = data;
+        p->next = h;
+        p->prev = h->prev;
+        h->prev->next = p;
+        h->prev = p;
+        h = p;
+    }
+}
+
+void insertlast(int data) {
+    if (h == NULL) {
+        createNode(data);
+    } else {
+        struct Node *p = (struct Node *)malloc(sizeof(struct Node));
+        p->data = data;
+        p->next = h;
+        p->prev = h->prev;
+        h->prev->next = p;
+        h->prev = p;
+    }
+}
+
+void deletefirst() {
+    if (h == NULL) {
+        printf("Underflow\n");
+    } else if (h->next == h)
+	{
+        free(h);
+        h = NULL;
+    } else {
+        struct Node *p = h;
+        h->prev->next = h->next;
+        h->next->prev = h->prev;
+        h = h->next;
+        free(p);
+    }
+}
+
+void deletelast() {
+    if (h == NULL) {
+        printf("Underflow\n");
+    } else if (h->next == h)
+	{
+        free(h);
+        h = NULL;
+    } else {
+        struct Node *p = h->prev;
+        p->prev->next = h;
+        h->prev = p->prev;
+        free(p);
+    }
+}
+
+void insertrandom(int loc, int data) {
+    if (h == NULL) {
+        printf("List is empty. Cannot insert at specified location.\n");
+        return;
+    }
+
+    struct Node *p = h;
+    do {
+        if (p->data == loc) {
+            break;
+        }
+        p = p->next;
+    } while (p != h);
+
+    if (p == h && p->data != loc) {
+        printf("Location not found in the list.\n");
+    } else {
+        struct Node *r = (struct Node *)malloc(sizeof(struct Node));
+        r->data = data;
+        r->next = p->next;
+        r->prev = p;
+        p->next->prev = r;
+        p->next = r;
+    }
+}
+
+void deleterandom(int loc) {
+    if (h == NULL) {
+        printf("Underflow\n");
+    } else {
+        struct Node *p = h;
+        do {
+            if (p->data == loc) {
+                break;
+            }
+            p = p->next;
+        } while (p != h);
+
+        if (p == h && p->data != loc) {
+            printf("Location not found\n");
+        } else if (p == h)
+		{
+            deletefirst();
+        } else if (p->next == h) {
+            deletelast();
+        } else {
+            p->prev->next = p->next;
+            p->next->prev = p->prev;
+            free(p);
+        }
+    }
+}
+
+void display() {
+    if (h == NULL) {
+        printf("List is empty\n");
+    } else {
+        struct Node *p = h;
+        printf("Circular Doubly Linked List: ");
+        do {
+            printf("%d ", p->data);
+            p = p->next;
+        } while (p != h);
+        printf("\n");
+    }
+}
+
+void createListFromUser() {
+    int n, data, i;
+
+    printf("Enter the number of nodes: ");
+    scanf("%d", &n);
+
+    for (i = 0; i < n; i++) {
+        printf("Enter data for node %d: ", i + 1);
+        scanf("%d", &data);
+        insertlast(data);
+    }
+}
+
+int main() {
+    int choice, data, loc;
+
+    createListFromUser();
+    display();
+
+    while (1) {
+        printf("\nMenu:\n");
+        printf("1. Insert at beginning\n");
+        printf("2. Insert at end\n");
+        printf("3. Insert after a specific data\n");
+        printf("4. Delete from beginning\n");
+        printf("5. Delete from end\n");
+        printf("6. Delete a specific node\n");
+        printf("7. Display the list\n");
+        printf("8. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter data to insert at beginning: ");
+                scanf("%d", &data);
+                insertfirst(data);
+                display();
+                break;
+            case 2:
+                printf("Enter data to insert at end: ");
+                scanf("%d", &data);
+                insertlast(data);
+                display();
+                break;
+            case 3:
+                printf("Enter data after which to insert: ");
+                scanf("%d", &loc);
+                printf("Enter data to insert: ");
+                scanf("%d", &data);
+                insertrandom(loc, data);
+                display();
+                break;
+            case 4:
+                deletefirst();
+                display();
+                break;
+            case 5:
+                deletelast();
+                display();
+                break;
+            case 6:
+                printf("Enter the data of the node to delete: ");
+                scanf("%d", &loc);
+                deleterandom(loc);
+                display();
+                break;
+            case 7:
+                display();
+                break;
+            case 8:
+                exit(0);
+            default:
+                printf("Invalid choice\n");
+        }
+    }
+    return 0;
+}

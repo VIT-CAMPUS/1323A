@@ -1,0 +1,208 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Node{
+   int data;
+   struct Node *next;
+};
+
+struct Node* createLinkedList(int n) {
+    struct Node *head = NULL;
+    struct Node *temp = NULL;
+    struct Node *p = NULL;
+
+    for (int i = 0; i < n; i++) {
+        temp = (struct Node*)malloc(sizeof(struct Node));
+        printf("Enter data for node %d: ", i + 1);
+        scanf("%d", &(temp->data));
+        temp->next = NULL;
+
+        if (head == NULL) {
+            head = temp; // First node
+        } else {
+            p->next = temp; // Link the new node at the end of the list
+        }
+        p = temp; // Move 'p' to the newly created node
+    }
+
+    return head;
+}
+
+void linked_listTraversal(struct Node *ptr) {
+    while (ptr != NULL) {
+
+        printf("Element: %d\n", ptr->data);
+        ptr = ptr->next;
+    }
+}
+
+struct Node * InsertBegin(struct Node *head, int newNode_data) {
+    struct Node *ptr = (struct Node *)malloc(sizeof(struct Node));
+    if (ptr == NULL) { // Check if memory allocation was successful
+        printf("Memory allocation failed\n");
+        return head;
+    }
+    ptr->data=newNode_data;
+    ptr->next = head;
+    head = ptr;
+    return head;
+}
+
+struct Node * InsertAtIndex(struct Node *head, int newNode_data,int index) {
+    struct Node *ptr = (struct Node *)malloc(sizeof(struct Node));
+    struct Node * p =  head;
+    int i=0;
+    while(i!=index-1){
+    p = p->next;
+    i++;
+    }
+    ptr->data=newNode_data;
+    ptr->next = p->next;
+    p->next = ptr;
+}
+
+struct Node * InsertEnd(struct Node *head, int newNode_data) {
+    struct Node *ptr = (struct Node *)malloc(sizeof(struct Node));
+    struct Node * p =  head;
+    int i=0;
+    while(p->next!=NULL){
+    p = p->next;
+    i++;
+    }
+    ptr->data=newNode_data;
+    ptr->next=NULL;
+    p->next=ptr;
+    //ptr is a new node which we are insearting and while loop is there to find the node before NULL that is p
+    return head;
+}
+
+struct Node* deleteAtFront(struct Node *head) {
+    if (head == NULL) {
+        printf("The list is already empty.\n");
+        return NULL;
+    }
+
+    struct Node *ptr = head;
+    head = head->next; // Move the head to the next node
+    free(ptr); // Free the memory of the old head node
+
+    return head;
+}
+
+struct Node* deleteAtIndex(struct Node * head, int index) {
+
+
+    struct Node * p = head;
+    int i=0;
+    //Going till 1 previous to the index
+    while(i!=index-1){
+    p = p->next;
+    i++;
+    }
+    struct Node * q = p->next;//here q will point out to p ka next lets take it r so p=r
+    p->next=q->next;//here p will point out to q ka next that is next of r let take it s
+    free(q);// so here p will directly pointing out to s so r that is q(r) will be removed
+    return head;
+
+}
+
+struct Node* deleteAtEnd(struct Node *head) {
+    if (head == NULL) {
+        // List is empty
+        printf("The list is already empty.\n");
+        return NULL;
+    }
+
+    if (head->next == NULL) {
+        // List has only one node
+        free(head);
+        return NULL;
+    }
+
+    // Traverse to the second last node
+    struct Node *p = head;
+    while (p->next->next != NULL) {
+        p = p->next;
+    }
+
+    // p now points to the second last node
+    struct Node *q = p->next; // Last node
+    p->next = NULL; // Remove the link to the last node
+    free(q); // Free the memory of the last node
+
+    return head;
+}
+
+int main() {
+
+    struct Node *head=NULL;
+    int n,newNode_data,index,choice;
+
+    printf("Enter the number of nodes: ");
+    scanf("%d", &n);
+
+    head = createLinkedList(n);
+
+    printf("Linked List before insertion is:\n");
+    // Traverse and print the linked list
+    linked_listTraversal(head);
+
+
+    while (1) {
+        printf("\nMenu:\n");
+        printf("1. Insert at beginning\n");
+        printf("2. Insert at end\n");
+        printf("3. Insert after a specific data\n");
+        printf("4. Delete from beginning\n");
+        printf("5. Delete from end\n");
+        printf("6. Delete a specific node\n");
+        printf("7. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter data to insert at beginning: ");
+                scanf("%d", &newNode_data);
+                head=InsertBegin(head,newNode_data);
+                linked_listTraversal(head);
+                break;
+            case 2:
+                printf("Enter data to insert at end: ");
+                scanf("%d", &newNode_data);
+                InsertEnd(head,newNode_data);
+                linked_listTraversal(head);
+                break;
+            case 3:
+                printf("Enter data after which to insert: ");
+                scanf("%d", &index);
+                printf("Enter data to insert: ");
+                scanf("%d", &newNode_data);
+                InsertAtIndex(head,newNode_data,index);
+                linked_listTraversal(head);
+                break;
+            case 4:
+                head = deleteAtFront(head);
+                linked_listTraversal(head);
+                break;
+            case 5:
+                deleteAtEnd(head);
+                linked_listTraversal(head);
+                break;
+            case 6:
+                printf("Enter the data of the node to delete: ");
+                scanf("%d", &index);
+                deleteAtIndex(head,index);
+                linked_listTraversal(head);
+                break;
+            case 7:
+                exit(0);
+            default:
+                printf("Invalid choice\n");
+        }
+
+
+    return 0;
+}
+}
+

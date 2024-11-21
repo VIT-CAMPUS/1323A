@@ -1,0 +1,165 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+
+typedef struct Node {
+    int data;
+    struct Node* left;
+    struct Node* right;
+} Node;
+
+
+typedef struct Stack {
+    Node* node;
+    struct Stack* next;
+} Stack;
+
+
+Node* createNode(int value) {
+    Node* newNode = (Node*)malloc(sizeof(Node));
+    newNode->data = value;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+
+void push(Stack** stack, Node* node) {
+    Stack* newNode = (Stack*)malloc(sizeof(Stack));
+    newNode->node = node;
+    newNode->next = *stack;
+    *stack = newNode;
+}
+
+Node* pop(Stack** stack) {
+    if (*stack == NULL) return NULL;
+    Stack* temp = *stack;
+    *stack = (*stack)->next;
+    Node* poppedNode = temp->node;
+    free(temp);
+    return poppedNode;
+}
+
+int isEmpty(Stack* stack) {
+    return stack == NULL;
+}
+
+// Inorder Traversal using Stack
+void inorder(Node* root) {
+    Stack* stack = NULL;
+    Node* current = root;
+
+    while (current != NULL || !isEmpty(stack)) {
+        while (current != NULL) {
+            push(&stack, current);
+            current = current->left;
+        }
+
+        current = pop(&stack);
+        printf("%d ", current->data);
+        current = current->right;
+    }
+}
+
+// Preorder Traversal using Stack
+void preorder(Node* root) {
+    if (root == NULL) return;
+
+    Stack* stack = NULL;
+    push(&stack, root);
+
+    while (!isEmpty(stack)) {
+        Node* current = pop(&stack);
+        printf("%d ", current->data);
+
+        if (current->right) push(&stack, current->right);
+        if (current->left) push(&stack, current->left);
+    }
+}
+
+// Postorder Traversal using Two Stacks
+void postorder(Node* root) {
+    if (root == NULL) return;
+
+    Stack *stack1 = NULL, *stack2 = NULL;
+    push(&stack1, root);
+
+    while (!isEmpty(stack1)) {
+        Node* current = pop(&stack1);
+        push(&stack2, current);
+
+        if (current->left) push(&stack1, current->left);
+        if (current->right) push(&stack1, current->right);
+    }
+
+    while (!isEmpty(stack2)) {
+        printf("%d ", pop(&stack2)->data);
+    }
+}
+
+// Function to insert a new node in the tree
+Node* insert(Node* root, int data) {
+    if (root == NULL) {
+        return createNode(data);
+    }
+
+    if (data < root->data) {
+        root->left = insert(root->left, data);
+    } else if (data > root->data) {
+        root->right = insert(root->right, data);
+    }
+
+    return root;
+}
+
+// Main Function
+int main() {
+    Node* root = NULL;
+    int choice, value;
+
+    while (1) {
+        printf("\nBinary Tree Operations Menu\n");
+        printf("1. Insert Node\n");
+        printf("2. Preorder Traversal\n");
+        printf("3. Inorder Traversal\n");
+        printf("4. Postorder Traversal\n");
+        printf("5. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter the value to insert: ");
+                scanf("%d", &value);
+                root = insert(root, value);
+                printf("Node inserted.\n");
+                break;
+
+            case 2:
+                printf("Preorder Traversal: ");
+                preorder(root);
+                printf("\n");
+                break;
+
+            case 3:
+                printf("Inorder Traversal: ");
+                inorder(root);
+                printf("\n");
+                break;
+
+            case 4:
+                printf("Postorder Traversal: ");
+                postorder(root);
+                printf("\n");
+                break;
+
+            case 5:
+                exit(0);
+
+            default:
+                printf("Invalid choice! Please enter a valid option.\n");
+        }
+    }
+
+    return 0;
+}

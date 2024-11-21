@@ -1,0 +1,136 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define TABLE_SIZE 10
+#define DELETED_MARKER -1
+
+// Structure to store a key-value pair
+typedef struct {
+    int key;
+    int value;
+} HashNode;
+
+// Hash Table
+HashNode* hashTable[TABLE_SIZE];
+
+// Initialize the hash table
+void initializeTable() {
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        hashTable[i] = NULL;
+    }
+}
+
+// Hash function
+int hashFunction(int key) {
+    return key % TABLE_SIZE;
+}
+
+// Insert a key-value pair into the hash table
+void insert(int key, int value) {
+    int index = hashFunction(key);
+
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        int probeIndex = (index + i) % TABLE_SIZE;
+
+        // If the slot is empty or marked as deleted, insert the key-value pair
+        if (hashTable[probeIndex] == NULL || hashTable[probeIndex]->key == DELETED_MARKER) {
+            if (hashTable[probeIndex] == NULL) {
+                hashTable[probeIndex] = (HashNode*)malloc(sizeof(HashNode));
+            }
+            hashTable[probeIndex]->key = key;
+            hashTable[probeIndex]->value = value;
+            return;
+        }
+
+        // If the key already exists, update its value
+        if (hashTable[probeIndex]->key == key) {
+            hashTable[probeIndex]->value = value;
+            return;
+        }
+    }
+
+    printf("Hash table is full. Cannot insert key %d\n", key);
+}
+
+// Search for a value by its key
+int search(int key) {
+    int index = hashFunction(key);
+
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        int probeIndex = (index + i) % TABLE_SIZE;
+
+        // If the slot is empty, the key does not exist
+        if (hashTable[probeIndex] == NULL) {
+            return -1;
+        }
+
+        // If the key is found, return the value
+        if (hashTable[probeIndex]->key == key) {
+            return hashTable[probeIndex]->value;
+        }
+    }
+
+    return -1; // Key not found
+}
+
+// Delete a key-value pair by its key
+void delete(int key) {
+    int index = hashFunction(key);
+
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        int probeIndex = (index + i) % TABLE_SIZE;
+
+        // If the slot is empty, the key does not exist
+        if (hashTable[probeIndex] == NULL) {
+            printf("Key %d not found.\n", key);
+            return;
+        }
+
+        // If the key is found, mark it as deleted
+        if (hashTable[probeIndex]->key == key) {
+            hashTable[probeIndex]->key = DELETED_MARKER;
+            printf("Key %d deleted.\n", key);
+            return;
+        }
+    }
+
+    printf("Key %d not found.\n", key);
+}
+
+// Display the hash table
+void displayTable() {
+    printf("Hash Table:\n");
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        if (hashTable[i] == NULL) {
+            printf("[%d] : NULL\n", i);
+        } else if (hashTable[i]->key == DELETED_MARKER) {
+            printf("[%d] : <deleted>\n", i);
+        } else {
+            printf("[%d] : Key = %d, Value = %d\n", i, hashTable[i]->key, hashTable[i]->value);
+        }
+    }
+}
+
+// Main function
+int main() {
+    initializeTable();
+
+    insert(1, 10);
+    insert(11, 20);
+    insert(21, 30);
+    insert(31, 40);
+
+    displayTable();
+
+    printf("\nSearching for key 11: Value = %d\n", search(11));
+    printf("Searching for key 5: Value = %d\n", search(5));
+
+    printf("\nDeleting key 11.\n");
+    delete(11);
+
+    displayTable();
+
+    return 0;
+}
+

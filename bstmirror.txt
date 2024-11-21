@@ -1,0 +1,146 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node {
+    int data;
+    struct Node *left, *right;
+} Node;
+
+// Function to create a new node
+Node* createNode(int data) {
+    Node* newNode = (Node*)malloc(sizeof(Node));
+    newNode->data = data;
+    newNode->left = newNode->right = NULL;
+    return newNode;
+}
+
+// Recursive function to build the binary tree based on user input
+Node* createTree() {
+    int data;
+    printf("Enter data of the node (-1 for no node): ");
+    scanf("%d", &data);
+
+    if (data == -1) {
+        return NULL;  // No node to create, return NULL
+    }
+
+    // Create new node with the given data
+    Node* newNode = createNode(data);
+
+    // Prompt to create the left child of this node
+    printf("Enter left child of %d\n", data);
+    newNode->left = createTree();
+
+    // Prompt to create the right child of this node
+    printf("Enter right child of %d\n", data);
+    newNode->right = createTree();
+
+    return newNode;
+}
+
+// Function to mirror the tree
+void mirrorTree(Node* node) {
+    if (node == NULL) {
+        return;
+    }
+
+    // Swap the left and right children
+    Node* temp = node->left;
+    node->left = node->right;
+    node->right = temp;
+
+    // Recursively mirror the left and right subtrees
+    mirrorTree(node->left);
+    mirrorTree(node->right);
+}
+
+// Function to calculate the height of the tree
+int height(Node* node) {
+    if (node == NULL) {
+        return 0;
+    }
+    int leftHeight = height(node->left);
+    int rightHeight = height(node->right);
+    return (leftHeight > rightHeight ? leftHeight : rightHeight) + 1;
+}
+
+// Function to display all leaf nodes
+void displayLeafNodes(Node* node) {
+    if (node == NULL) {
+        return;
+    }
+    if (node->left == NULL && node->right == NULL) {
+        printf("%d ", node->data);
+    }
+    displayLeafNodes(node->left);
+    displayLeafNodes(node->right);
+}
+
+// Function to display the tree level-wise (BFS traversal)
+void displayLevelOrder(Node* root) {
+    if (root == NULL) {
+        return;
+    }
+
+    Node* queue[100];
+    int front = 0, rear = 0;
+
+    queue[rear++] = root;
+    while (front < rear) {
+        Node* current = queue[front++];
+        printf("%d ", current->data);
+
+        if (current->left != NULL) {
+            queue[rear++] = current->left;
+        }
+        if (current->right != NULL) {
+            queue[rear++] = current->right;
+        }
+    }
+    printf("\n");
+}
+
+int main() {
+    Node* root = NULL;
+    int choice;
+
+    while (1) {
+        printf("\nBinary Tree Operations Menu\n");
+        printf("1. Create Tree\n");
+        printf("2. Mirror Tree\n");
+        printf("3. Height of Tree\n");
+        printf("4. Display Leaf Nodes\n");
+        printf("5. Level-wise Display\n");
+        printf("6. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                root = createTree();
+                break;
+            case 2:
+                mirrorTree(root);
+                printf("Tree mirrored.\n");
+                break;
+            case 3:
+                printf("Height of the tree: %d\n", height(root));
+                break;
+            case 4:
+                printf("Leaf nodes: ");
+                displayLeafNodes(root);
+                printf("\n");
+                break;
+            case 5:
+                printf("Level-wise display: ");
+                displayLevelOrder(root);
+                break;
+            case 6:
+                exit(0);
+            default:
+                printf("Invalid choice!\n");
+        }
+    }
+
+    return 0;
+}
